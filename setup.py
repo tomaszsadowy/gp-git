@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name='z-git',
+    name='zgit',
     version='0.0.1',
     author='Tomasz Sadowy',
     author_email='tomaszsadowypriv@gmail.com',

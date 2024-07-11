@@ -2,6 +2,7 @@ import argparse
 import os
 import files
 
+#git init
 def init(args):
     files.init()
     print(f'Initialized a new zgit repository in {os.getcwd()}/{files.ZGIT_DIR}')

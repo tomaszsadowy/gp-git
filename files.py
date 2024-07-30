@@ -7,32 +7,36 @@ from contextlib import contextmanager
 
 ZGIT_DIR = None
 
+
 @contextmanager
 def change_git_dir(new_dir):
     global ZGIT_DIR
     old_dir = ZGIT_DIR
-    ZGIT_DIR = f'{new_dir}/.zgit'
+    ZGIT_DIR = f"{new_dir}/.zgit"
     yield
     ZGIT_DIR = old_dir
+
 
 def init():
     os.makedirs(ZGIT_DIR)
     os.makedirs(f"{ZGIT_DIR}/objects")
 
-RefValue = namedtuple('RefValue', ['symbolic', 'value'])
+
+RefValue = namedtuple("RefValue", ["symbolic", "value"])
+
 
 def update_ref(ref, value, deref=True):
     ref = _get_ref_internal(ref, deref)[0]
 
     assert value.value
     if value.symbolic:
-        value = f'ref: {value.value}'
+        value = f"ref: {value.value}"
     else:
         value = value.value
 
-    ref_path = f'{ZGIT_DIR}/{ref}'
-    os.makedirs (os.path.dirname(ref_path), exist_ok=True)
-    with open(ref_path, 'w') as f:
+    ref_path = f"{ZGIT_DIR}/{ref}"
+    os.makedirs(os.path.dirname(ref_path), exist_ok=True)
+    with open(ref_path, "w") as f:
         f.write(value)
 
 
@@ -42,19 +46,19 @@ def get_ref(ref, deref=True):
 
 def delete_ref(ref, deref=True):
     ref = _get_ref_internal(ref, deref)[0]
-    os.remove(f'{ZGIT_DIR}/{ref}')
+    os.remove(f"{ZGIT_DIR}/{ref}")
 
 
 def _get_ref_internal(ref, deref):
-    ref_path = f'{ZGIT_DIR}/{ref}'
+    ref_path = f"{ZGIT_DIR}/{ref}"
     value = None
     if os.path.isfile(ref_path):
         with open(ref_path) as f:
             value = f.read().strip()
 
-    symbolic = bool(value) and value.startswith('ref:')
+    symbolic = bool(value) and value.startswith("ref:")
     if symbolic:
-        value = value.split(':', 1)[1].strip()
+        value = value.split(":", 1)[1].strip()
         if deref:
             return _get_ref_internal(value, deref=True)
 
@@ -62,16 +66,16 @@ def _get_ref_internal(ref, deref):
 
 
 def get_head():
-    if os.path.isfile(f'{ZGIT_DIR}/HEAD'):
-        with open(f'{ZGIT_DIR}/HEAD') as f:
+    if os.path.isfile(f"{ZGIT_DIR}/HEAD"):
+        with open(f"{ZGIT_DIR}/HEAD") as f:
             return f.read().strip()
 
 
-def iter_refs(prefix='', deref=True):
-    refs = ['HEAD', 'MERGE_HEAD']
-    for root, _, filenames in os.walk(f'{ZGIT_DIR}/refs/'):
+def iter_refs(prefix="", deref=True):
+    refs = ["HEAD", "MERGE_HEAD"]
+    for root, _, filenames in os.walk(f"{ZGIT_DIR}/refs/"):
         root = os.path.relpath(root, ZGIT_DIR)
-        refs.extend(f'{root}/{name}' for name in filenames)
+        refs.extend(f"{root}/{name}" for name in filenames)
 
     for refname in refs:
         if not refname.startswith(prefix):
@@ -84,12 +88,12 @@ def iter_refs(prefix='', deref=True):
 @contextmanager
 def get_index():
     index = {}
-    if os.path.isfile(f'{ZGIT_DIR}/index'):
-        with open(f'{ZGIT_DIR}/index') as f:
+    if os.path.isfile(f"{ZGIT_DIR}/index"):
+        with open(f"{ZGIT_DIR}/index") as f:
             index = json.load(f)
     yield index
 
-    with open(f'{ZGIT_DIR}/index', 'w') as f:
+    with open(f"{ZGIT_DIR}/index", "w") as f:
         json.dump(index, f)
 
 
@@ -114,18 +118,16 @@ def get_object(obj_id, expected="blob"):
 
 
 def object_exists(obj_id):
-    return os.path.isfile(f'{ZGIT_DIR}/objects/{obj_id}')
+    return os.path.isfile(f"{ZGIT_DIR}/objects/{obj_id}")
 
 
 def fetch_object_if_missing(obj_id, remote_git_dir):
     if object_exists(obj_id):
         return
-    remote_git_dir += '/.ugit'
-    shutil.copy(f'{remote_git_dir}/objects/{obj_id}',
-                 f'{ZGIT_DIR}/objects/{obj_id}')
+    remote_git_dir += "/.ugit"
+    shutil.copy(f"{remote_git_dir}/objects/{obj_id}", f"{ZGIT_DIR}/objects/{obj_id}")
 
 
 def push_object(obj_id, remote_git_dir):
-    remote_git_dir += '/.ugit'
-    shutil.copy(f'{ZGIT_DIR}/objects/{obj_id}',
-                 f'{remote_git_dir}/objects/{obj_id}')
+    remote_git_dir += "/.ugit"
+    shutil.copy(f"{ZGIT_DIR}/objects/{obj_id}", f"{remote_git_dir}/objects/{obj_id}")

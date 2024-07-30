@@ -5,7 +5,7 @@ import files
 
 
 def compare_trees(*trees):
-    entries = defaultdict (lambda: [None] * len(trees))
+    entries = defaultdict(lambda: [None] * len(trees))
     for i, tree in enumerate(trees):
         for path, oid in tree.items():
             entries[path][i] = oid
@@ -17,32 +17,39 @@ def compare_trees(*trees):
 def iter_changed_files(t_from, t_to):
     for path, o_from, o_to in compare_trees(t_from, t_to):
         if o_from != o_to:
-            action = ('new file' if not o_from else
-                      'deleted' if not o_to else
-                      'modified')
+            action = "new file" if not o_from else "deleted" if not o_to else "modified"
             yield path, action
 
 
 def diff_trees(t_from, t_to):
-    output = b''
+    output = b""
     for path, o_from, o_to in compare_trees(t_from, t_to):
         if o_from != o_to:
             output += diff_blobs(o_from, o_to, path)
     return output
 
 
-def diff_blobs(o_from, o_to, path='blob'):
+def diff_blobs(o_from, o_to, path="blob"):
     with Temp() as f_from, Temp() as f_to:
         for obj_id, f in ((o_from, f_from), (o_to, f_to)):
             if obj_id:
-                f.write(files.get_object (obj_id))
+                f.write(files.get_object(obj_id))
                 f.flush()
 
-        with subprocess.Popen (
-            ['diff', '--unified', '--show-c-function',
-             '--label', f'a/{path}', f_from.name,
-             '--label', f'b/{path}', f_to.name],
-            stdout=subprocess.PIPE) as proc:
+        with subprocess.Popen(
+            [
+                "diff",
+                "--unified",
+                "--show-c-function",
+                "--label",
+                f"a/{path}",
+                f_from.name,
+                "--label",
+                f"b/{path}",
+                f_to.name,
+            ],
+            stdout=subprocess.PIPE,
+        ) as proc:
             output, _ = proc.communicate()
 
         return output
@@ -64,11 +71,21 @@ def merge_blobs(o_base, o_HEAD, o_other):
                 f.flush()
 
         with subprocess.Popen(
-            ['diff3', '-m',
-             '-L', 'HEAD', f_HEAD.name,
-             '-L', 'BASE', f_base.name,
-             '-L', 'MERGE_HEAD', f_other.name,
-            ], stdout=subprocess.PIPE) as proc:
+            [
+                "diff3",
+                "-m",
+                "-L",
+                "HEAD",
+                f_HEAD.name,
+                "-L",
+                "BASE",
+                f_base.name,
+                "-L",
+                "MERGE_HEAD",
+                f_other.name,
+            ],
+            stdout=subprocess.PIPE,
+        ) as proc:
             output, _ = proc.communicate()
             assert proc.returncode in (0, 1)
 

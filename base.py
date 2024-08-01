@@ -7,8 +7,8 @@ import files
 import diff
 
 
-def init():
-    files.init()
+def start():
+    files.start()
     files.update_ref("HEAD", files.RefValue(symbolic=True, value="refs/heads/master"))
 
 

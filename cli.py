@@ -19,10 +19,10 @@ def print_help():
     ░╚═════╝░╚═╝░░░░░░░░░░░░╚═════╝░╚═╝░░░╚═╝░░░  
     """ 
     help_text = """
-    GP-GIT -  An alternative to git, built using Python
+    GP-GIT -  A lightweight local  version of git, built in pure Python.
 
     Available commands:
-      init          Initialize a new repository
+      start (init)  Creates a new project in your current working directory
       hash-object   Compute object ID and optionally creates a blob from a file
       cat-file      Provide content or type and size information for repository objects
       write-tree    Create a tree object from the current index
@@ -39,9 +39,9 @@ def print_help():
     print(help_text)
 
 
-def init(args):
-    base.init()
-    print(f"Initialized a new gpgit repository in {os.getcwd()}/{files.GPGIT_DIR}")
+def start(args):
+    base.start()
+    print(f"Created a new gpgit repository in {os.getcwd()}/{files.GPGIT_DIR}")
 
 
 def hash_object(args):
@@ -216,8 +216,8 @@ def main():
 
     obj_id = base.get_obj_id
 
-    init_parser = commands.add_parser("init", help="Initialize a new repository")
-    init_parser.set_defaults(func=init)
+    start_parser = commands.add_parser("start", help="Creates a new repository")
+    start_parser.set_defaults(func=start)
 
     hash_obj_parser = commands.add_parser("hash-object")
     hash_obj_parser.set_defaults(func=hash_object)

@@ -17,7 +17,7 @@ def change_git_dir(new_dir):
     GPGIT_DIR = old_dir
 
 
-def init():
+def start():
     os.makedirs(GPGIT_DIR)
     os.makedirs(f"{GPGIT_DIR}/objects")
 

@@ -9,9 +9,39 @@ import remote
 import subprocess
 
 
+def print_help():
+    logo = """
+    ░██████╗░██████╗░░░░░░░░██████╗░██╗████████╗
+    ██╔════╝░██╔══██╗░░░░░░██╔════╝░██║╚══██╔══╝
+    ██║░░██╗░██████╔╝█████╗██║░░██╗░██║░░░██║░░░
+    ██║░░╚██╗██╔═══╝░╚════╝██║░░╚██╗██║░░░██║░░░
+    ╚██████╔╝██║░░░░░░░░░░░╚██████╔╝██║░░░██║░░░
+    ░╚═════╝░╚═╝░░░░░░░░░░░░╚═════╝░╚═╝░░░╚═╝░░░  
+    """ 
+    help_text = """
+    GP-GIT -  An alternative to git, built using Python
+
+    Available commands:
+      init          Initialize a new repository
+      hash-object   Compute object ID and optionally creates a blob from a file
+      cat-file      Provide content or type and size information for repository objects
+      write-tree    Create a tree object from the current index
+      read-tree     Read tree information into the index
+      commit        Record changes to the repository
+      log           Show commit logs
+      show          Show various types of objects
+      diff          Show changes between commits, commit and working tree, etc
+      checkout      Switch branches or restore working tree files
+      tag           Create, list, delete or verify a tag object signed with GPG
+      branch        List, create, or delete branches
+    """
+    print(logo)
+    print(help_text)
+
+
 def init(args):
     base.init()
-    print(f"Initialized a new zgit repository in {os.getcwd()}/{files.ZGIT_DIR}")
+    print(f"Initialized a new gpgit repository in {os.getcwd()}/{files.GPGIT_DIR}")
 
 
 def hash_object(args):
@@ -180,7 +210,7 @@ def add(args):
 
 
 def main():
-    parser = argparse.ArgumentParser(prog="zgit")
+    parser = argparse.ArgumentParser(prog="gpgit")
     commands = parser.add_subparsers(dest="command")
     commands.required = True
 
@@ -233,7 +263,7 @@ def main():
     branch_parser = commands.add_parser("branch")
     branch_parser.set_defaults(func=branch)
     branch_parser.add_argument("name")
-    branch_parser.add_argument("start_point", default="0", type="obj_id", nargs="?")
+    branch_parser.add_argument("start_point", default="0", type=obj_id, nargs="?")
 
     k_parser = commands.add_parser("k")
     k_parser.set_defaults(func=k)
@@ -267,5 +297,12 @@ def main():
     add_parser.set_defaults(func=add)
     add_parser.add_argument("files", nargs="+")
 
+    help_parser = commands.add_parser("help", help="Show help information")
+    help_parser.set_defaults(func=lambda args: print_help())
+
     args = parser.parse_args()
     args.func(args)
+
+if __name__ == "__main__":
+    main()
+

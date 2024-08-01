@@ -327,4 +327,4 @@ def add(filenames):
 
 
 def is_ignored(path):
-    return ".zgit" in path.split("/")
+    return ".gpgit" in path.split("/")

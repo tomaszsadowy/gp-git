@@ -5,21 +5,21 @@ import hashlib
 from collections import namedtuple
 from contextlib import contextmanager
 
-ZGIT_DIR = None
+GPGIT_DIR = None
 
 
 @contextmanager
 def change_git_dir(new_dir):
-    global ZGIT_DIR
-    old_dir = ZGIT_DIR
-    ZGIT_DIR = f"{new_dir}/.zgit"
+    global GPGIT_DIR
+    old_dir = GPGIT_DIR
+    GPGIT_DIR = f"{new_dir}/.gpgit"
     yield
-    ZGIT_DIR = old_dir
+    GPGIT_DIR = old_dir
 
 
 def init():
-    os.makedirs(ZGIT_DIR)
-    os.makedirs(f"{ZGIT_DIR}/objects")
+    os.makedirs(GPGIT_DIR)
+    os.makedirs(f"{GPGIT_DIR}/objects")
 
 
 RefValue = namedtuple("RefValue", ["symbolic", "value"])
@@ -34,7 +34,7 @@ def update_ref(ref, value, deref=True):
     else:
         value = value.value
 
-    ref_path = f"{ZGIT_DIR}/{ref}"
+    ref_path = f"{GPGIT_DIR}/{ref}"
     os.makedirs(os.path.dirname(ref_path), exist_ok=True)
     with open(ref_path, "w") as f:
         f.write(value)
@@ -46,11 +46,11 @@ def get_ref(ref, deref=True):
 
 def delete_ref(ref, deref=True):
     ref = _get_ref_internal(ref, deref)[0]
-    os.remove(f"{ZGIT_DIR}/{ref}")
+    os.remove(f"{GPGIT_DIR}/{ref}")
 
 
 def _get_ref_internal(ref, deref):
-    ref_path = f"{ZGIT_DIR}/{ref}"
+    ref_path = f"{GPGIT_DIR}/{ref}"
     value = None
     if os.path.isfile(ref_path):
         with open(ref_path) as f:
@@ -66,15 +66,15 @@ def _get_ref_internal(ref, deref):
 
 
 def get_head():
-    if os.path.isfile(f"{ZGIT_DIR}/HEAD"):
-        with open(f"{ZGIT_DIR}/HEAD") as f:
+    if os.path.isfile(f"{GPGIT_DIR}/HEAD"):
+        with open(f"{GPGIT_DIR}/HEAD") as f:
             return f.read().strip()
 
 
 def iter_refs(prefix="", deref=True):
     refs = ["HEAD", "MERGE_HEAD"]
-    for root, _, filenames in os.walk(f"{ZGIT_DIR}/refs/"):
-        root = os.path.relpath(root, ZGIT_DIR)
+    for root, _, filenames in os.walk(f"{GPGIT_DIR}/refs/"):
+        root = os.path.relpath(root, GPGIT_DIR)
         refs.extend(f"{root}/{name}" for name in filenames)
 
     for refname in refs:
@@ -88,25 +88,25 @@ def iter_refs(prefix="", deref=True):
 @contextmanager
 def get_index():
     index = {}
-    if os.path.isfile(f"{ZGIT_DIR}/index"):
-        with open(f"{ZGIT_DIR}/index") as f:
+    if os.path.isfile(f"{GPGIT_DIR}/index"):
+        with open(f"{GPGIT_DIR}/index") as f:
             index = json.load(f)
     yield index
 
-    with open(f"{ZGIT_DIR}/index", "w") as f:
+    with open(f"{GPGIT_DIR}/index", "w") as f:
         json.dump(index, f)
 
 
 def hash_object(data, type_="blob"):
     obj = type_.encode() + b"\x00" + data
     obj_id = hashlib.sha1(obj).hexdigest()
-    with open(f"{ZGIT_DIR}/objects/{obj_id}", "wb") as out:
+    with open(f"{GPGIT_DIR}/objects/{obj_id}", "wb") as out:
         out.write(obj)
     return obj_id
 
 
 def get_object(obj_id, expected="blob"):
-    with open(f"{ZGIT_DIR}/objects/{obj_id}", "rb") as f:
+    with open(f"{GPGIT_DIR}/objects/{obj_id}", "rb") as f:
         obj = f.read()
 
     type_, _, content = obj.partition(b"\x00")
@@ -118,16 +118,16 @@ def get_object(obj_id, expected="blob"):
 
 
 def object_exists(obj_id):
-    return os.path.isfile(f"{ZGIT_DIR}/objects/{obj_id}")
+    return os.path.isfile(f"{GPGIT_DIR}/objects/{obj_id}")
 
 
 def fetch_object_if_missing(obj_id, remote_git_dir):
     if object_exists(obj_id):
         return
-    remote_git_dir += "/.ugit"
-    shutil.copy(f"{remote_git_dir}/objects/{obj_id}", f"{ZGIT_DIR}/objects/{obj_id}")
+    remote_git_dir += "/.gpgit"
+    shutil.copy(f"{remote_git_dir}/objects/{obj_id}", f"{GPGIT_DIR}/objects/{obj_id}")
 
 
 def push_object(obj_id, remote_git_dir):
-    remote_git_dir += "/.ugit"
-    shutil.copy(f"{ZGIT_DIR}/objects/{obj_id}", f"{remote_git_dir}/objects/{obj_id}")
+    remote_git_dir += "/.gpgit"
+    shutil.copy(f"{GPGIT_DIR}/objects/{obj_id}", f"{remote_git_dir}/objects/{obj_id}")

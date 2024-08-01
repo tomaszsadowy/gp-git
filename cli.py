@@ -19,7 +19,7 @@ def print_help():
     ░╚═════╝░╚═╝░░░░░░░░░░░░╚═════╝░╚═╝░░░╚═╝░░░  
     """ 
     help_text = """
-    GP-GIT -  A lightweight local  version of git, built in pure Python.
+    GP-GIT -  A lightweight local version of git, built in pure Python.
 
     Available commands:
       start (init)  Creates a new project in your current working directory

@@ -2,7 +2,7 @@ import unittest
 import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from files import object_exists, hash_object, get_object
+from files import object_exists, fingerprint, get_object
 
 class TestFiles(unittest.TestCase):
 
@@ -10,9 +10,9 @@ class TestFiles(unittest.TestCase):
         self.assertTrue(object_exists('some_existing_object_id'))
         self.assertFalse(object_exists('non_existing_object_id'))
 
-    def test_hash_object(self):
+    def test_fingerprint(self):
         data = b"test data"
-        obj_id = hash_object(data)
+        obj_id = fingerprint(data)
         self.assertEqual(len(obj_id), 40)  # SHA-1 hash length
 
     def test_get_object(self):

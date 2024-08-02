@@ -4,7 +4,7 @@ import os
 import string
 from collections import deque, namedtuple
 import files
-import diff
+import compare
 
 
 def start():
@@ -38,7 +38,7 @@ def write_tree():
         tree = "".join(
             f"{type_} {obj_id} {name}\n" for name, obj_id, type_ in sorted(entries)
         )
-        return files.hash_object(tree.encode(), "tree")
+        return files.fingerprint(tree.encode(), "tree")
 
     return write_tree_recursive(index_as_tree)
 
@@ -75,7 +75,7 @@ def get_working_tree():
             if is_ignored(path) or not os.path.isfile(path):
                 continue
             with open(path, "rb") as f:
-                result[path] = files.hash_object(f.read())
+                result[path] = files.fingerprint(f.read())
         return result
 
 
@@ -107,21 +107,21 @@ def read_tree(tree_obj_id, update_working=False):
         index.update(get_tree(tree_obj_id))
 
         if update_working:
-            _checkout_index(index)
+            _switch_index(index)
 
 
-def read_tree_merged(t_base, t_HEAD, t_other, update_working=False):
+def read_tree_combined(t_base, t_HEAD, t_other, update_working=False):
     with files.get_index() as index:
         index.clear()
         index.update(
-            diff.merge_trees(get_tree(t_base), get_tree(t_HEAD), get_tree(t_other))
+            compare.combine_trees(get_tree(t_base), get_tree(t_HEAD), get_tree(t_other))
         )
 
         if update_working:
-            _checkout_index(index)
+            _switch_index(index)
 
 
-def _checkout_index(index):
+def _switch_index(index):
     _empty_current_directory()
     for path, obj_id in index.items():
         os.makedirs(os.path.dirname(f"./{path}"), exist_ok=True)
@@ -129,28 +129,28 @@ def _checkout_index(index):
             f.write(files.get_object(obj_id, "blob"))
 
 
-def commit(message):
-    commit = f"tree {write_tree()}\n"
+def save(message):
+    save = f"tree {write_tree()}\n"
     HEAD = files.get_ref("HEAD").value
     if HEAD:
-        commit += f"parent {HEAD}\n"
-    MERGE_HEAD = files.get_ref("MERGE_HEAD").value
-    if MERGE_HEAD:
-        commit += f"parent {MERGE_HEAD}\n"
-        files.delete_ref("MERGE_HEAD", deref=False)
+        save += f"parent {HEAD}\n"
+    COMBINE_HEAD = files.get_ref("COMBINE_HEAD").value
+    if COMBINE_HEAD:
+        save += f"parent {COMBINE_HEAD}\n"
+        files.delete_ref("COMBINE_HEAD", deref=False)
 
-    commit += "\n"
-    commit += f"{message}\n"
+    save += "\n"
+    save += f"{message}\n"
 
-    obj_id = files.hash_object(commit.encode(), "commit")
+    obj_id = files.fingerprint(save.encode(), "save")
     files.update_ref("HEAD", files.RefValue(symbolic=False, value=obj_id))
     return obj_id
 
 
-def checkout(name):
+def switch(name):
     obj_id = get_obj_id(name)
-    commit = get_commit(obj_id)
-    read_tree(commit.tree, update_working=True)
+    save = get_save(obj_id)
+    read_tree(save.tree, update_working=True)
 
     if is_branch(name):
         HEAD = files.RefValue(symbolic=True, value=f"refs/heads/{name}")
@@ -164,40 +164,40 @@ def reset(obj_id):
     files.update_ref("HEAD", files.RefValue(symbolic=False, value=obj_id))
 
 
-def merge(other):
+def combine(other):
     HEAD = files.get_ref("HEAD").value
     assert HEAD
-    merge_base = get_merge_base(other, HEAD)
-    c_other = get_commit(other)
+    combine_base = get_combine_base(other, HEAD)
+    c_other = get_save(other)
 
-    if merge_base == HEAD:
+    if combine_base == HEAD:
         read_tree(c_other.tree, update_working=True)
         files.update_ref("HEAD", files.RefValue(symbolic=False, value=other))
-        print("Fast-forward merge, no need to commit")
+        print("Fast-forward combine, no need to save")
         return
 
-    files.update_ref("MERGE_HEAD", files.RefValue(symbolic=False, value=other))
+    files.update_ref("COMBINE_HEAD", files.RefValue(symbolic=False, value=other))
 
-    c_base = get_commit(merge_base)
-    c_HEAD = get_commit(HEAD)
-    read_tree_merged(c_base.tree, c_HEAD.tree, c_other.tree, update_working=True)
-    print("Merged in working tree\nPlease commit")
+    c_base = get_save(combine_base)
+    c_HEAD = get_save(HEAD)
+    read_tree_combined(c_base.tree, c_HEAD.tree, c_other.tree, update_working=True)
+    print("Combined in working tree\nPlease save")
 
 
-def get_merge_base(obj_id1, obj_id2):
-    parents1 = set(iter_commits_and_parents({obj_id1}))
+def get_combine_base(obj_id1, obj_id2):
+    parents1 = set(iter_saves_and_parents({obj_id1}))
 
-    for obj_id in iter_commits_and_parents({obj_id2}):
+    for obj_id in iter_saves_and_parents({obj_id2}):
         if obj_id in parents1:
             return obj_id
 
 
-def is_ancestor_of(commit, maybe_ancestor):
-    return maybe_ancestor in iter_commits_and_parents({commit})
+def is_ancestor_of(save, maybe_ancestor):
+    return maybe_ancestor in iter_saves_and_parents({save})
 
 
-def create_tag(name, obj_id):
-    files.update_ref(f"refs/tags/{name}", files.RefValue(symbolic=False, value=obj_id))
+def create_label(name, obj_id):
+    files.update_ref(f"refs/labels/{name}", files.RefValue(symbolic=False, value=obj_id))
 
 
 def iter_branch_names():
@@ -222,14 +222,14 @@ def create_branch(name, obj_id):
     files.update_ref(f"refs/heads/{name}", files.RefValue(symbolic=False, value=obj_id))
 
 
-_commit = namedtuple("_commit", ["tree", "parents", "message"])
+_save = namedtuple("_save", ["tree", "parents", "message"])
 
 
-def get_commit(obj_id):
+def get_save(obj_id):
     parents = []
 
-    commit = files.get_object(obj_id, "commit").decode()
-    lines = iter(commit.splitlines())
+    save = files.get_object(obj_id, "save").decode()
+    lines = iter(save.splitlines())
     for line in itertools.takewhile(operator.truth, lines):
         key, value = line.split(" ", 1)
         if key == "tree":
@@ -240,10 +240,10 @@ def get_commit(obj_id):
             assert False, f"Unknown field {key}"
 
     message = "\n".join(lines)
-    return _commit(tree=tree, parents=parents, message=message)
+    return _save(tree=tree, parents=parents, message=message)
 
 
-def iter_commits_and_parents(obj_ids):
+def iter_saves_and_parents(obj_ids):
     obj_ids = deque(obj_ids)
     visited = set()
 
@@ -254,12 +254,12 @@ def iter_commits_and_parents(obj_ids):
         visited.add(obj_id)
         yield obj_id
 
-        commit = get_commit(obj_id)
-        obj_ids.extendleft(commit.parents[:1])
-        obj_ids.extend(commit.parents[1:])
+        save = get_save(obj_id)
+        obj_ids.extendleft(save.parents[:1])
+        obj_ids.extend(save.parents[1:])
 
 
-def iter_objects_in_commits(obj_ids):
+def iter_objects_in_saves(obj_ids):
     visited = set()
 
     def iter_objects_in_tree(obj_id):
@@ -273,11 +273,11 @@ def iter_objects_in_commits(obj_ids):
                     visited.add(obj_id)
                     yield obj_id
 
-    for obj_id in iter_commits_and_parents(obj_ids):
+    for obj_id in iter_saves_and_parents(obj_ids):
         yield obj_id
-        commit = get_commit(obj_id)
-        if commit.tree not in visited:
-            yield from iter_objects_in_tree(commit.tree)
+        save = get_save(obj_id)
+        if save.tree not in visited:
+            yield from iter_objects_in_tree(save.tree)
 
 
 def get_obj_id(name):
@@ -287,7 +287,7 @@ def get_obj_id(name):
     refs_to_try = [
         f"{name}",
         f"refs/{name}",
-        f"refs/tags/{name}",
+        f"refs/labels/{name}",
         f"refs/heads/{name}",
     ]
     for ref in refs_to_try:
@@ -302,28 +302,28 @@ def get_obj_id(name):
     assert False, f"Unknown name {name}"
 
 
-def add(filenames):
+def track(filenames):
 
-    def add_file(filename):
+    def track_file(filename):
         filename = os.path.relpath(filename)
         with open(filename, "rb") as f:
-            obj_id = files.hash_object(f.read())
+            obj_id = files.fingerprint(f.read())
         index[filename] = obj_id
 
-    def add_directory(dirname):
+    def track_directory(dirname):
         for root, _, filenames in os.walk(dirname):
             for filename in filenames:
                 path = os.path.relpath(f"{root}/{filename}")
                 if is_ignored(path) or not os.path.isfile(path):
                     continue
-                add_file(path)
+                track_file(path)
 
     with files.get_index() as index:
         for name in filenames:
             if os.path.isfile(name):
-                add_file(name)
+                track_file(name)
             elif os.path.isdir(name):
-                add_directory(name)
+                track_directory(name)
 
 
 def is_ignored(path):

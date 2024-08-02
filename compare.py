@@ -21,15 +21,15 @@ def iter_changed_files(t_from, t_to):
             yield path, action
 
 
-def diff_trees(t_from, t_to):
+def compare_trees(t_from, t_to):
     output = b""
     for path, o_from, o_to in compare_trees(t_from, t_to):
         if o_from != o_to:
-            output += diff_blobs(o_from, o_to, path)
+            output += compare_blobs(o_from, o_to, path)
     return output
 
 
-def diff_blobs(o_from, o_to, path="blob"):
+def compare_blobs(o_from, o_to, path="blob"):
     with Temp() as f_from, Temp() as f_to:
         for obj_id, f in ((o_from, f_from), (o_to, f_to)):
             if obj_id:
@@ -38,7 +38,7 @@ def diff_blobs(o_from, o_to, path="blob"):
 
         with subprocess.Popen(
             [
-                "diff",
+                "compare",
                 "--unified",
                 "--show-c-function",
                 "--label",
@@ -55,14 +55,14 @@ def diff_blobs(o_from, o_to, path="blob"):
         return output
 
 
-def merge_trees(t_base, t_HEAD, t_other):
+def combine_trees(t_base, t_HEAD, t_other):
     tree = {}
     for path, o_base, o_HEAD, o_other in compare_trees(t_base, t_HEAD, t_other):
-        tree[path] = files.hash_object(merge_blobs(o_base, o_HEAD, o_other))
+        tree[path] = files.fingerprint(combine_blobs(o_base, o_HEAD, o_other))
     return tree
 
 
-def merge_blobs(o_base, o_HEAD, o_other):
+def combine_blobs(o_base, o_HEAD, o_other):
     with Temp() as f_base, Temp() as f_HEAD, Temp() as f_other:
 
         for oid, f in ((o_base, f_base), (o_HEAD, f_HEAD), (o_other, f_other)):
@@ -72,7 +72,7 @@ def merge_blobs(o_base, o_HEAD, o_other):
 
         with subprocess.Popen(
             [
-                "diff3",
+                "compare3",
                 "-m",
                 "-L",
                 "HEAD",
@@ -81,7 +81,7 @@ def merge_blobs(o_base, o_HEAD, o_other):
                 "BASE",
                 f_base.name,
                 "-L",
-                "MERGE_HEAD",
+                "COMBINE_HEAD",
                 f_other.name,
             ],
             stdout=subprocess.PIPE,

@@ -72,7 +72,7 @@ def get_head():
 
 
 def iter_refs(prefix="", deref=True):
-    refs = ["HEAD", "MERGE_HEAD"]
+    refs = ["HEAD", "COMBINE_HEAD"]
     for root, _, filenames in os.walk(f"{GPGIT_DIR}/refs/"):
         root = os.path.relpath(root, GPGIT_DIR)
         refs.extend(f"{root}/{name}" for name in filenames)
@@ -97,7 +97,7 @@ def get_index():
         json.dump(index, f)
 
 
-def hash_object(data, type_="blob"):
+def fingerprint(data, type_="blob"):
     obj = type_.encode() + b"\x00" + data
     obj_id = hashlib.sha1(obj).hexdigest()
     with open(f"{GPGIT_DIR}/objects/{obj_id}", "wb") as out:
@@ -121,13 +121,13 @@ def object_exists(obj_id):
     return os.path.isfile(f"{GPGIT_DIR}/objects/{obj_id}")
 
 
-def fetch_object_if_missing(obj_id, remote_git_dir):
+def download_object_if_missing(obj_id, remote_git_dir):
     if object_exists(obj_id):
         return
     remote_git_dir += "/.gpgit"
     shutil.copy(f"{remote_git_dir}/objects/{obj_id}", f"{GPGIT_DIR}/objects/{obj_id}")
 
 
-def push_object(obj_id, remote_git_dir):
+def throw_object(obj_id, remote_git_dir):
     remote_git_dir += "/.gpgit"
     shutil.copy(f"{GPGIT_DIR}/objects/{obj_id}", f"{remote_git_dir}/objects/{obj_id}")

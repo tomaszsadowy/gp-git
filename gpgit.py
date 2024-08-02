@@ -4,7 +4,7 @@ import os
 import textwrap
 import files
 import base
-import diff
+import compare
 import remote
 import subprocess
 
@@ -19,21 +19,26 @@ def print_help():
     ░╚═════╝░╚═╝░░░░░░░░░░░░╚═════╝░╚═╝░░░╚═╝░░░  
     """ 
     help_text = """
-    GP-GIT -  A lightweight local version of git, built in pure Python.
+    GP-GIT -  A lightweight local version of git for newbies, built in pure Python.
 
     Available commands:
-      start (init)  Creates a new project in your current working directory
-      hash-object   Compute object ID and optionally creates a blob from a file
-      cat-file      Provide content or type and size information for repository objects
+      start|init    Creates a new project in your current working directory
+      save|commit   Record changes to the repository
+      throw|push    xxxxxx
+      catch|pull    xxxxxx LLL
+      history|log   Show saved history
+      combine|merge xxxxxxx
+      fingerprint|hash   Compute object ID and optionally creates a blob from a file
+      view|cat_file Provide content or type and size information for repository objects
       write-tree    Create a tree object from the current index
       read-tree     Read tree information into the index
-      commit        Record changes to the repository
-      log           Show commit logs
       show          Show various types of objects
-      diff          Show changes between commits, commit and working tree, etc
-      checkout      Switch branches or restore working tree files
-      tag           Create, list, delete or verify a tag object signed with GPG
+      compare|diff  Show changes between commits, commit and working tree, etc
+      switch|checkout Switch branches or restore working tree files
+      label|tag     Create, list, delete or verify a tag object signed with GPG
       branch        List, create, or delete branches
+      download|fetch xxxx
+      track|add     xxxxx
     """
     print(logo)
     print(help_text)
@@ -44,84 +49,84 @@ def start(args):
     print(f"Created a new gpgit repository in {os.getcwd()}/{files.GPGIT_DIR}")
 
 
-def hash_object(args):
+def fingerprint(args):
     with open(args.file, "rb") as f:
-        print(files.hash_object(f.read()))
+        print(files.fingerprint(f.read()))
 
 
-def cat_file(args):
+def view(args):
     sys.stdout.flush()
     sys.stdout.buffer.write(files.get_object(args.object, expected=None))
-
-
-def write_tree(args):
-    print(base.write_tree())
 
 
 def read_tree(args):
     base.read_tree(args.tree)
 
 
-def commit(args):
-    print(base.commit(args.message))
+def write_tree(args):
+    print(base.write_tree())
 
 
-def _print_commit(obj_id, commit, refs=None):
+def save(args):
+    print(base.save(args.message))
+
+
+def _print_save(obj_id, save, refs=None):
     refs_str = f' ({", ".join(refs)})' if refs else ""
-    print(f"commit {obj_id}{refs_str}\n")
-    print(textwrap.indent(commit.message, "    "))
+    print(f"save {obj_id}{refs_str}\n")
+    print(textwrap.indent(save.message, "    "))
     print("")
 
 
-def log(args):
+def history(args):
     refs = {}
     for refname, ref in files.iter_refs():
         refs.setdefault(ref.value, []).append(refname)
 
-    for obj_id in base.iter_commits_and_parents({args.obj_id}):
-        commit = base.get_commit(obj_id)
-        _print_commit(obj_id, commit, refs.get(obj_id))
+    for obj_id in base.iter_saves_and_parents({args.obj_id}):
+        save = base.get_save(obj_id)
+        _print_save(obj_id, save, refs.get(obj_id))
 
 
 def show(args):
     if not args.obj_id:
         return
-    commit = base.get_commit(args.obj_id)
+    save = base.get_save(args.obj_id)
     parent_tree = None
-    if commit.parents:
-        parent_tree = base.get_commit(commit.parents[0]).tree
-    _print_commit(args.obj_id, commit)
-    result = diff.diff_trees(base.get_tree(parent_tree), base.get_tree(commit.tree))
+    if save.parents:
+        parent_tree = base.get_save(save.parents[0]).tree
+    _print_save(args.obj_id, save)
+    result = compare.compare_trees(base.get_tree(parent_tree), base.get_tree(save.tree))
     sys.stdout.flush()
     sys.stdout.buffer.write(result)
 
 
-def _diff(args):
-    obj_id = args.commit and base.get_obj_id(args.commit)
-    if args.commit:
-        tree_from = base.get_tree(obj_id and base.get_commit(obj_id).tree)
+def _compare(args):
+    obj_id = args.save and base.get_obj_id(args.save)
+    if args.save:
+        tree_from = base.get_tree(obj_id and base.get_save(obj_id).tree)
 
     if args.cached:
         tree_to = base.get_index_tree()
-        if not args.commit:
+        if not args.save:
             obj_id = base.get_obj_id("@")
-            tree_from = base.get_tree(obj_id and base.get_commit(obj_id).tree)
+            tree_from = base.get_tree(obj_id and base.get_save(obj_id).tree)
         else:
             tree_to = base.get_working_tree()
-            if not args.commit:
+            if not args.save:
                 tree_from = base.get_index_tree()
 
-        result = diff.diff_trees(tree_from, tree_to)
+        result = compare.compare_trees(tree_from, tree_to)
         sys.stdout.flush()
         sys.stdout.buffer.write(result)
 
 
-def checkout(args):
-    base.checkout(args.commit)
+def switch(args):
+    base.switch(args.save)
 
 
-def tag(args):
-    base.create_tag(args.name, args.obj_id)
+def label(args):
+    base.create_label(args.name, args.obj_id)
 
 
 def branch(args):
@@ -136,7 +141,7 @@ def branch(args):
 
 
 def k(args):
-    dot = "digraph commits {\n"
+    dot = "digraph saves {\n"
     obj_ids = set()
 
     for refname, ref in files.iter_refs():
@@ -145,10 +150,10 @@ def k(args):
         if not ref.symbolic:
             obj_ids.add(ref.value)
 
-    for obj_id in base.iter_commits_and_parents(obj_ids):
-        commit = base.get_commit(obj_id)
+    for obj_id in base.iter_saves_and_parents(obj_ids):
+        save = base.get_save(obj_id)
         dot += f'"{obj_id}" [shape=box style=filled label="{obj_id[:10]}"]\n'
-        for parent in commit.parents:
+        for parent in save.parents:
             dot += f'"{obj_id}" -> "{parent}"\n'
 
     dot += "}"
@@ -168,45 +173,45 @@ def status(args):
     else:
         print(f"HEAD detached at {HEAD[:10]}")
 
-    MERGE_HEAD = files.get_ref("MERGE_HEAD").value
-    if MERGE_HEAD:
-        print(f"Merging with {MERGE_HEAD[:10]}")
+    COMBINE_HEAD = files.get_ref("COMBINE_HEAD").value
+    if COMBINE_HEAD:
+        print(f"Merging with {COMBINE_HEAD[:10]}")
 
-    print("\nChanges to be commited:\n")
-    HEAD_tree = HEAD and base.get_commit(HEAD).tree
-    for path, action in diff.iter_changed_files(
+    print("\nChanges to be saved:\n")
+    HEAD_tree = HEAD and base.get_save(HEAD).tree
+    for path, action in compare.iter_changed_files(
         base.get_tree(HEAD_tree), base.get_index_tree()
     ):
         print(f"{action:>12}: {path}")
-    print("\nChanges not stages for commit:\n")
-    for path, action in diff.iter_changed_files(
+    print("\nChanges not staged for save:\n")
+    for path, action in compare.iter_changed_files(
         base.get_index_tree(), base.get_working_tree()
     ):
         print(f"{action:>12}: {path}")
 
 
 def reset(args):
-    base.reset(args.commit)
+    base.reset(args.save)
 
 
-def merge(args):
-    base.merge(args.commit)
+def combine(args):
+    base.combine(args.save)
 
 
-def merge_base(args):
-    print(base.get_merge_base(args.commit1, args.commit2))
+def combine_base(args):
+    print(base.get_combine_base(args.save1, args.save2))
 
 
-def fetch(args):
-    remote.fetch(args.remote)
+def download(args):
+    remote.download(args.remote)
 
 
-def push(args):
-    remote.push(args.remote, f"refs/heads/{args.branch}")
+def throw(args):
+    remote.throw(args.remote, f"refs/heads/{args.branch}")
 
 
-def add(args):
-    base.add(args.files)
+def track(args):
+    base.track(args.files)
 
 
 def main():
@@ -219,13 +224,13 @@ def main():
     start_parser = commands.add_parser("start", help="Creates a new repository")
     start_parser.set_defaults(func=start)
 
-    hash_obj_parser = commands.add_parser("hash-object")
-    hash_obj_parser.set_defaults(func=hash_object)
-    hash_obj_parser.add_argument("file")
+    fingerprint_obj_parser = commands.add_parser("fingerprint")
+    fingerprint_obj_parser.set_defaults(func=fingerprint)
+    fingerprint_obj_parser.add_argument("file")
 
-    cat_file_parser = commands.add_parser("cat-file")
-    cat_file_parser.set_defaults(func=cat_file)
-    cat_file_parser.add_argument("object", type=obj_id)
+    view_parser = commands.add_parser("cat-file")
+    view_parser.set_defaults(func=view)
+    view_parser.add_argument("object", type=obj_id)
 
     write_tree_parser = commands.add_parser("write-tree")
     write_tree_parser.set_defaults(func=write_tree)
@@ -234,31 +239,31 @@ def main():
     read_tree_parser.set_defaults(func=read_tree)
     read_tree_parser.add_argument("tree", type=obj_id)
 
-    commit_parser = commands.add_parser("commit")
-    commit_parser.set_defaults(func=commit)
-    commit_parser.add_argument("-m", "--message", required=True)
+    save_parser = commands.add_parser("save")
+    save_parser.set_defaults(func=save)
+    save_parser.add_argument("-m", "--message", required=True)
 
-    log_parser = commands.add_parser("log")
-    log_parser.set_defaults(func=log)
-    log_parser.add_argument("obj_id", default="0", type=obj_id, nargs="?")
+    history_parser = commands.add_parser("history")
+    history_parser.set_defaults(func=history)
+    history_parser.add_argument("obj_id", default="0", type=obj_id, nargs="?")
 
     show_parser = commands.add_parser("show")
     show_parser.set_defaults(func=show)
     show_parser.add_argument("obj_id", default="0", type=obj_id, nargs="?")
 
-    diff_parser = commands.add_parser("diff")
-    diff_parser.set_defaults(func=_diff)
-    diff_parser.add_argument("--cached", action="store_true")
-    diff_parser.add_argument("commit", nargs="?")
+    compare_parser = commands.add_parser("compare")
+    compare_parser.set_defaults(func=_compare)
+    compare_parser.add_argument("--cached", action="store_true")
+    compare_parser.add_argument("save", nargs="?")
 
-    checkout_parser = commands.add_parser("checkout")
-    checkout_parser.set_defaults(func=checkout)
-    checkout_parser.add_argument("obj_id", type=obj_id)
+    switch_parser = commands.add_parser("switch")
+    switch_parser.set_defaults(func=switch)
+    switch_parser.add_argument("obj_id", type=obj_id)
 
-    tag_parser = commands.add_parser("tag")
-    tag_parser.set_defaults(func=tag)
-    tag_parser.add_argument("name")
-    tag_parser.add_argument("obj_id", default="0", type=obj_id, nargs="?")
+    label_parser = commands.add_parser("label")
+    label_parser.set_defaults(func=label)
+    label_parser.add_argument("name")
+    label_parser.add_argument("obj_id", default="0", type=obj_id, nargs="?")
 
     branch_parser = commands.add_parser("branch")
     branch_parser.set_defaults(func=branch)
@@ -273,29 +278,29 @@ def main():
 
     reset_parser = commands.add_parser("reset")
     reset_parser.set_defaults(func=reset)
-    reset_parser.add_argument("commit", type=obj_id)
+    reset_parser.add_argument("save", type=obj_id)
 
-    merge_parser = commands.add_parser("merge")
-    merge_parser.set_defaults(func=merge)
-    merge_parser.add_argument("commit", type=obj_id)
+    combine_parser = commands.add_parser("combine")
+    combine_parser.set_defaults(func=combine)
+    combine_parser.add_argument("save", type=obj_id)
 
-    merge_base_parser = commands.add_parser("merge-base")
-    merge_base_parser.set_defaults(func=merge_base)
-    merge_base_parser.add_argument("commit1", type=obj_id)
-    merge_base_parser.add_argument("commit2", type=obj_id)
+    combine_base_parser = commands.add_parser("combine-base")
+    combine_base_parser.set_defaults(func=combine_base)
+    combine_base_parser.add_argument("save1", type=obj_id)
+    combine_base_parser.add_argument("save2", type=obj_id)
 
-    fetch_parser = commands.add_parser("fetch")
-    fetch_parser.set_defaults(func=fetch)
-    fetch_parser.add_argument("remote")
+    download_parser = commands.add_parser("download")
+    download_parser.set_defaults(func=download)
+    download_parser.add_argument("remote")
 
-    push_parser = commands.add_parser("push")
-    push_parser.set_defaults(func=push)
-    push_parser.add_argument("remote")
-    push_parser.add_argument("branch")
+    throw_parser = commands.add_parser("throw")
+    throw_parser.set_defaults(func=throw)
+    throw_parser.add_argument("remote")
+    throw_parser.add_argument("branch")
 
-    add_parser = commands.add_parser("add")
-    add_parser.set_defaults(func=add)
-    add_parser.add_argument("files", nargs="+")
+    track_parser = commands.add_parser("track")
+    track_parser.set_defaults(func=track)
+    track_parser.add_argument("files", nargs="+")
 
     help_parser = commands.add_parser("help", help="Show help information")
     help_parser.set_defaults(func=lambda args: print_help())

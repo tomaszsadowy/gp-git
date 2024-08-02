@@ -15,8 +15,8 @@ This package is entirely written in Python and includes a built-in code editor f
 ## Installation
 
 1. Install with [pip](xxxx)
-   + $ pip install gp-git
-   + $ gp-git
+   + $ `pip install gp-git`
+   + $ `gp-git`
 2. xxx
 
 

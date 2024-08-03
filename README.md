@@ -22,7 +22,7 @@ This package is entirely written in Python and includes a built-in code editor f
 
 ## Usage
 
-This package offers a vast amount of commands, with its full list being accesible via the `gpgit help` command. Below you can see all available commands and their descriptions.
+This package offers a vast amount of commands, with its full list being accesible via the `gp-git help` command. Below you can see all available commands and their descriptions.
 <h1 align="center">
   <img width="1197" alt="image" src="https://github.com/user-attachments/assets/d8a47d3f-2e6d-4faf-a061-94518ce0999b">
 </h1>
@@ -37,7 +37,7 @@ gp-git start
 #### - Record Changes to a Repository
 <i><b>save</b></i>: Records changes to the repository with a message describing the changes. This is a core function of any version control system, allowing you to save the state of your project.
 ```
-gp-git save "Your commit message"
+gp-git save <"Your commit message">
 ```
 ----
 #### - Send Changes to Repository
@@ -50,4 +50,9 @@ gp-git throw
 <i><b>history</b></i>: Displays the commit history of the repository. This is important for tracking changes over time and understanding the evolution of the project.
 ```
 gp-git history
+```
+#### - Switch Branches
+<i><b>switch</b></i>: Switches branches or restores working tree files. This is necessary for working on different features or versions of the project simultaneously.
+```
+gp-git switch <branch-name>
 ```

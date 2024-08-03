@@ -22,7 +22,10 @@ This package is entirely written in Python and includes a built-in code editor f
 
 ## Usage
 
-For full help use gpgit help
+This package offers a vast amount of commands, with its full list being accesible via the `gpgit help` command.
+
+<img width="device-width" alt="image" align="center" src="https://github.com/user-attachments/assets/5ffeb935-9198-402f-88e2-240332c7fe7a">
+
 
 #### - Initializing a Repository
 To start a new repository, use the start command:

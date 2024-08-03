@@ -24,56 +24,30 @@ This package is entirely written in Python and includes a built-in code editor f
 
 This package offers a vast amount of commands, with its full list being accesible via the `gpgit help` command. Below you can see all available commands and their descriptions.
 <h1 align="center">
-  <img width="500" alt="image" align="center" src="https://github.com/user-attachments/assets/5ffeb935-9198-402f-88e2-240332c7fe7a">
+  <img width="1197" alt="image" src="https://github.com/user-attachments/assets/d8a47d3f-2e6d-4faf-a061-94518ce0999b">
 </h1>
 
+Below are some examples of the more common commands:
 #### - Initializing a Repository
-To start a new repository, use the start command:
+<i><b>start</b></i>: Initializes a new project in the current working directory. This is essential for beginning version control on a new project.
 ```
-gpgit start
-```
-This will create a new repository in your current working directory.
-
-----
-#### - Writing a Tree
-To create a tree object from the current index, use the write-tree command:
-```
-gpgit write-tree
+gp-git start
 ```
 ----
-#### - Committing Changes
-To record changes to the repository, use the save command:
+#### - Record Changes to a Repository
+<i><b>save</b></i>: Records changes to the repository with a message describing the changes. This is a core function of any version control system, allowing you to save the state of your project.
 ```
-gpgit save -m "Your commit message"
-```
-----
-#### - Viewing the History
-To show the saved history, use the history command:
-```
-gpgit history
+gp-git save "Your commit message"
 ```
 ----
-#### - Comparing Changes
-To show changes between commits, the commit and working tree, etc., use the compare command:
+#### - Send Changes to Repository
+<i><b>throw</b></i>: Sends your saved changes to the remote repository. This is critical for sharing changes with collaborators and backing up your work.
 ```
-gpgit compare
-```
-----
-#### - Switching Branches
-To switch branches or restore working tree files, use the switch command:
-```
-gpgit switch <branch-name>
+gp-git throw
 ```
 ----
-#### - Labelling
-To create, list, delete, or verify a tag object signed with GPG, use the label command:
+#### - Display Save History
+<i><b>history</b></i>: Displays the commit history of the repository. This is important for tracking changes over time and understanding the evolution of the project.
 ```
-gpgit label <label-name>
+gp-git history
 ```
-----
-#### - Branch Management
-To list, create, or delete branches, use the branch command:
-```
-gpgit branch
-```
----- 

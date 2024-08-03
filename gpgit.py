@@ -11,34 +11,32 @@ import subprocess
 
 def print_help():
     logo = """
+    \033[1;32m
     ░██████╗░██████╗░░░░░░░░██████╗░██╗████████╗
     ██╔════╝░██╔══██╗░░░░░░██╔════╝░██║╚══██╔══╝
     ██║░░██╗░██████╔╝█████╗██║░░██╗░██║░░░██║░░░
     ██║░░╚██╗██╔═══╝░╚════╝██║░░╚██╗██║░░░██║░░░
     ╚██████╔╝██║░░░░░░░░░░░╚██████╔╝██║░░░██║░░░
     ░╚═════╝░╚═╝░░░░░░░░░░░░╚═════╝░╚═╝░░░╚═╝░░░  
+    \033[0m
     """ 
     help_text = """
-    GP-GIT -  A lightweight local version of git for newbies, built in pure Python.
+    \033[1;34mgp-git -  A lightweight local version control system for newbies, built in pure Python.\033[0m
 
-    Available commands:
-      start|init    Creates a new project in your current working directory
-      save|commit   Record changes to the repository
-      throw|push    xxxxxx
-      catch|pull    xxxxxx LLL
-      history|log   Show saved history
-      combine|merge xxxxxxx
-      fingerprint|hash   Compute object ID and optionally creates a blob from a file
-      view|cat_file Provide content or type and size information for repository objects
-      write-tree    Create a tree object from the current index
-      read-tree     Read tree information into the index
-      show          Show various types of objects
-      compare|diff  Show changes between commits, commit and working tree, etc
-      switch|checkout Switch branches or restore working tree files
-      label|tag     Create, list, delete or verify a tag object signed with GPG
-      branch        List, create, or delete branches
-      download|fetch xxxx
-      track|add     xxxxx
+    \033[1;33mAvailable commands:\033[0m
+      \033[1;36mstart\033[0m         Initializes a new project in your current working directory [\033[1;31minit\033[0m]                   | Usage: \033[1;32mgp-git start\033[0m
+      \033[1;36msave\033[0m          Records changes to the repository with a message describing the changes [\033[1;31mcommit\033[0m]     | Usage: \033[1;32mgp-git save "Your commit message"\033[0m
+      \033[1;36mthrow\033[0m         Sends your committed changes to the remote repository [\033[1;31mpush\033[0m]                         | Usage: \033[1;32mgp-git throw\033[0m
+      \033[1;36mhistory\033[0m       Displays the commit history of the repository [\033[1;31mlog\033[0m]                                  | Usage: \033[1;32mgp-git history\033[0m
+      \033[1;36mcombine\033[0m       Merges changes from one branch into another [\033[1;31mmerge\033[0m]                                  | Usage: \033[1;32mgp-git combine branch-name\033[0m
+      \033[1;36mfingerprint\033[0m   Computes the object ID (hash) of a file and optionally creates a blob from it [\033[1;31mhash\033[0m] | Usage: \033[1;32mgp-git fingerprint file-name\033[0m
+      \033[1;36mview\033[0m          Shows content or type and size information for repository objects [\033[1;31mcat-file\033[0m]         | Usage: \033[1;32mgp-git view object-id\033[0m
+      \033[1;36mwrite-tree\033[0m    Creates a tree object from the current index                                         | Usage: \033[1;32mgp-git write-tree\033[0m
+      \033[1;36mread-tree\033[0m     Reads tree information into the index                                                | Usage: \033[1;32mgp-git read-tree tree-id\033[0m
+      \033[1;36mshow\033[0m          Displays various types of objects (commits, trees, blobs, tags)                      | Usage: \033[1;32mgp-git show object-id\033[0m
+      \033[1;36mcompare\033[0m       Shows changes between commits, commit and working tree, etc [\033[1;31mdiff\033[0m]                   | Usage: \033[1;32mgp-git compare commit1 commit2\033[0m
+      \033[1;36mswitch\033[0m        Switches branches or restores working tree files [\033[1;31mcheckout\033[0m]                          | Usage: \033[1;32mgp-git switch branch-name\033[0m
+      \033[1;36mlabel\033[0m         Creates, lists, deletes or verifies a tag object signed with GPG [\033[1;31mtag\033[0m]               | Usage: \033[1;32mgp-git label tag-name\033[0m
     """
     print(logo)
     print(help_text)

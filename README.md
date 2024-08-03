@@ -23,6 +23,7 @@ This package is entirely written in Python and includes a built-in code editor f
 ## Usage
 
 This package offers a vast amount of commands, with its full list being accesible via the `gp-git help` command. Below you can see all available commands and their descriptions.
+The red commands inside the square brackets are the git equivalents for gp-gits command selection.
 <h1 align="center">
   <img width="1197" alt="image" src="https://github.com/user-attachments/assets/d8a47d3f-2e6d-4faf-a061-94518ce0999b">
 </h1>

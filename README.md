@@ -3,7 +3,7 @@
 </h1>
 
 <p align="center">
-  <i align="center"> A local version control system for newbies, fully built in Python </i>
+  <i align="center"> A local version control system for newbies, fully built in Python 🐍</i>
 </p> 
 
 ## Introduction

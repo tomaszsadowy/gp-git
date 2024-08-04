@@ -12,7 +12,7 @@ GPGIT_DIR = None
 def change_git_dir(new_dir):
     global GPGIT_DIR
     old_dir = GPGIT_DIR
-    GPGIT_DIR = f"{new_dir}/.gp-git"
+    GPGIT_DIR = f"{new_dir}/.gpgit"
     yield
     GPGIT_DIR = old_dir
 
@@ -62,7 +62,7 @@ def _get_ref_internal(ref, deref):
         if deref:
             return _get_ref_internal(value, deref=True)
 
-    return ref, RefValue(symbolic=False, value=value)
+    return ref, RefValue(symbolic=symbolic, value=value)
 
 
 def get_head():
@@ -124,10 +124,10 @@ def object_exists(obj_id):
 def download_object_if_missing(obj_id, remote_git_dir):
     if object_exists(obj_id):
         return
-    remote_git_dir += "/.gp-git"
+    remote_git_dir += "/.gpgit"
     shutil.copy(f"{remote_git_dir}/objects/{obj_id}", f"{GPGIT_DIR}/objects/{obj_id}")
 
 
 def throw_object(obj_id, remote_git_dir):
-    remote_git_dir += "/.gp-git"
+    remote_git_dir += "/.gpgit"
     shutil.copy(f"{GPGIT_DIR}/objects/{obj_id}", f"{remote_git_dir}/objects/{obj_id}")

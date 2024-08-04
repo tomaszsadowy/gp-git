@@ -2,10 +2,10 @@ import argparse
 import sys
 import os
 import textwrap
-import files
-import base
-import compare
-import remote
+from . import files
+from . import base
+from . import compare
+from . import remote
 import subprocess
 
 
@@ -45,7 +45,7 @@ def print_help():
 
 def start(args):
     base.start()
-    print(f"Created a new gp-git repository in {os.getcwd()}/{files.GPGIT_DIR}")
+    print(f"Created a new gpgit repository in {os.getcwd()}/{files.GPGIT_DIR}")
 
 
 def fingerprint(args):
@@ -214,7 +214,7 @@ def track(args):
 
 
 def main():
-    parser = argparse.ArgumentParser(prog="gp-git")
+    parser = argparse.ArgumentParser()
     commands = parser.add_subparsers(dest="command")
     commands.required = True
 
@@ -227,7 +227,7 @@ def main():
     fingerprint_obj_parser.set_defaults(func=fingerprint)
     fingerprint_obj_parser.add_argument("file")
 
-    view_parser = commands.add_parser("cat-file")
+    view_parser = commands.add_parser("view")
     view_parser.set_defaults(func=view)
     view_parser.add_argument("object", type=obj_id)
 
@@ -244,11 +244,11 @@ def main():
 
     history_parser = commands.add_parser("history")
     history_parser.set_defaults(func=history)
-    history_parser.add_argument("obj_id", default="0", type=obj_id, nargs="?")
+    history_parser.add_argument("obj_id", default="@", type=obj_id, nargs="?")
 
     show_parser = commands.add_parser("show")
     show_parser.set_defaults(func=show)
-    show_parser.add_argument("obj_id", default="0", type=obj_id, nargs="?")
+    show_parser.add_argument("obj_id", default="@", type=obj_id, nargs="?")
 
     compare_parser = commands.add_parser("compare")
     compare_parser.set_defaults(func=_compare)
@@ -262,12 +262,12 @@ def main():
     label_parser = commands.add_parser("label")
     label_parser.set_defaults(func=label)
     label_parser.add_argument("name")
-    label_parser.add_argument("obj_id", default="0", type=obj_id, nargs="?")
+    label_parser.add_argument("obj_id", default="@", type=obj_id, nargs="?")
 
     branch_parser = commands.add_parser("branch")
     branch_parser.set_defaults(func=branch)
     branch_parser.add_argument("name")
-    branch_parser.add_argument("start_point", default="0", type=obj_id, nargs="?")
+    branch_parser.add_argument("start_point", default="@", type=obj_id, nargs="?")
 
     vis_parser = commands.add_parser("vis")
     vis_parser.set_defaults(func=vis)
@@ -307,7 +307,4 @@ def main():
     with files.change_git_dir('.'):
         args = parser.parse_args()
         args.func(args)
-
-if __name__ == "__main__":
-    main()
 

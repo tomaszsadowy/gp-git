@@ -3,8 +3,8 @@ import operator
 import os
 import string
 from collections import deque, namedtuple
-import files
-import compare
+from . import files
+from . import compare
 
 
 def start():
@@ -76,7 +76,7 @@ def get_working_tree():
                 continue
             with open(path, "rb") as f:
                 result[path] = files.fingerprint(f.read())
-        return result
+    return result
 
 
 def get_index_tree():
@@ -291,10 +291,9 @@ def get_obj_id(name):
         f"refs/heads/{name}",
     ]
     for ref in refs_to_try:
-        if files.get_ref(ref).value():
+        if files.get_ref(ref, deref=False).value:
             return files.get_ref(ref).value
 
-    # Name is SHA1
     is_hex = all(c in string.hexdigits for c in name)
     if len(name) == 40 and is_hex:
         return name
@@ -327,4 +326,4 @@ def track(filenames):
 
 
 def is_ignored(path):
-    return ".gp-git" in path.split("/")
+    return ".gpgit" in path.split("/")

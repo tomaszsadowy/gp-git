@@ -1,7 +1,7 @@
 import subprocess
 from collections import defaultdict
 from tempfile import NamedTemporaryFile as Temp
-import files
+from . import files
 
 
 def compare_trees(*trees):

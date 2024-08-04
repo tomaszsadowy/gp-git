@@ -1,12 +1,12 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
-    name='gp-git',
+    name='gpgit',
     version='0.0.1',
     author='Tomasz Sadowy',
     author_email='tomaszsadowypriv@gmail.com',
     description='A local version control system, built for newbies.',
-    packages=find_packages(),
+    packages=['gpgit'],
     entry_points={
         'console_scripts': [
             'gpgit = gpgit.gpgit:main'

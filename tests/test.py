@@ -2,7 +2,7 @@ import unittest
 import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from files import object_exists, fingerprint, get_object
+from gpgit.files import object_exists, fingerprint, get_object
 
 class TestFiles(unittest.TestCase):
 

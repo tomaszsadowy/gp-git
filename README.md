@@ -15,12 +15,15 @@ This package is entirely written in Python and includes a built-in code editor f
 
 ## Installation
 
-1. Install with [pip](xxxx):
+1. Install with [pip](https://pypi.org/project/gp-git/):
    ```sh
    pip install gp-git
    gp-git
    ```
-2. Follow the on-screen instructions to complete the setup.
+2. You may need to also install [graphviz](https://pypi.org/project/graphviz/) if you haven't already to use the `gp-git vis` command.
+   ```sh
+   pip install graphviz
+   ```
 
 ## Usage
 

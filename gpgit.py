@@ -31,6 +31,7 @@ def print_help():
       \033[1;36mcombine\033[0m       Merges changes from one branch into another [\033[1;31mmerge\033[0m]                                  | Usage: \033[1;32mgp-git combine branch-name\033[0m
       \033[1;36mfingerprint\033[0m   Computes the object ID (hash) of a file and optionally creates a blob from it [\033[1;31mhash\033[0m] | Usage: \033[1;32mgp-git fingerprint file-name\033[0m
       \033[1;36mview\033[0m          Shows content or type and size information for repository objects [\033[1;31mcat-file\033[0m]         | Usage: \033[1;32mgp-git view object-id\033[0m
+      \033[1;36mvis\033[0m           Visualizes commit history using graph structures                                     | Usage: \033[1;32mgp-git vis\033[0m
       \033[1;36mwrite-tree\033[0m    Creates a tree object from the current index                                         | Usage: \033[1;32mgp-git write-tree\033[0m
       \033[1;36mread-tree\033[0m     Reads tree information into the index                                                | Usage: \033[1;32mgp-git read-tree tree-id\033[0m
       \033[1;36mshow\033[0m          Displays various types of objects (commits, trees, blobs, tags)                      | Usage: \033[1;32mgp-git show object-id\033[0m
@@ -138,7 +139,7 @@ def branch(args):
         print(f"Branch {args.name} created at {args.start_point[:10]}")
 
 
-def k(args):
+def vis(args):
     dot = "digraph saves {\n"
     obj_ids = set()
 
@@ -268,8 +269,8 @@ def main():
     branch_parser.add_argument("name")
     branch_parser.add_argument("start_point", default="0", type=obj_id, nargs="?")
 
-    k_parser = commands.add_parser("k")
-    k_parser.set_defaults(func=k)
+    vis_parser = commands.add_parser("vis")
+    vis_parser.set_defaults(func=vis)
 
     status_parser = commands.add_parser("status")
     status_parser.set_defaults(func=status)
@@ -303,8 +304,9 @@ def main():
     help_parser = commands.add_parser("help", help="Show help information")
     help_parser.set_defaults(func=lambda args: print_help())
 
-    args = parser.parse_args()
-    args.func(args)
+    with files.change_git_dir('.'):
+        args = parser.parse_args()
+        args.func(args)
 
 if __name__ == "__main__":
     main()

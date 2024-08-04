@@ -45,7 +45,7 @@ def print_help():
 
 def start(args):
     base.start()
-    print(f"Created a new gpgit repository in {os.getcwd()}/{files.GPGIT_DIR}")
+    print(f"Created a new gp-git repository in {os.getcwd()}/{files.GPGIT_DIR}")
 
 
 def fingerprint(args):
@@ -214,7 +214,7 @@ def track(args):
 
 
 def main():
-    parser = argparse.ArgumentParser(prog="gpgit")
+    parser = argparse.ArgumentParser(prog="gp-git")
     commands = parser.add_subparsers(dest="command")
     commands.required = True
 

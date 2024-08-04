@@ -327,4 +327,4 @@ def track(filenames):
 
 
 def is_ignored(path):
-    return ".gpgit" in path.split("/")
+    return ".gp-git" in path.split("/")

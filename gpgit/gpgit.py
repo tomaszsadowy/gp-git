@@ -25,19 +25,21 @@ def print_help():
 
     \033[1;33mAvailable commands:\033[0m
       \033[1;36mstart\033[0m         Initializes a new project in your current working directory [\033[1;31minit\033[0m]                   | Usage: \033[1;32mgp-git start\033[0m
-      \033[1;36msave\033[0m          Records changes to the repository with a message describing the changes [\033[1;31mcommit\033[0m]     | Usage: \033[1;32mgp-git save "Your commit message"\033[0m
-      \033[1;36mthrow\033[0m         Sends your committed changes to the remote repository [\033[1;31mpush\033[0m]                         | Usage: \033[1;32mgp-git throw\033[0m
-      \033[1;36mhistory\033[0m       Displays the commit history of the repository [\033[1;31mlog\033[0m]                                  | Usage: \033[1;32mgp-git history\033[0m
-      \033[1;36mcombine\033[0m       Merges changes from one branch into another [\033[1;31mmerge\033[0m]                                  | Usage: \033[1;32mgp-git combine branch-name\033[0m
-      \033[1;36mfingerprint\033[0m   Computes the object ID (hash) of a file and optionally creates a blob from it [\033[1;31mhash\033[0m] | Usage: \033[1;32mgp-git fingerprint file-name\033[0m
-      \033[1;36mview\033[0m          Shows content or type and size information for repository objects [\033[1;31mcat-file\033[0m]         | Usage: \033[1;32mgp-git view object-id\033[0m
+      \033[1;36mtrack\033[0m         Tracks files in your repository[\033[1;31madd\033[0m]                                                 | Usage: \033[1;32mgp-git track [file-name1] [file-name2]...\033[0m
+      \033[1;36msave\033[0m          Records changes to the repository with a message describing the changes [\033[1;31mcommit\033[0m]     | Usage: \033[1;32mgp-git save ["Your commit message"]\033[0m
+      \033[1;36mthrow\033[0m         Sends your saved changes to the remote repository [\033[1;31mpush\033[0m]                             | Usage: \033[1;32mgp-git throw [remote] [branch-name]\033[0m
+      \033[1;36mlabel\033[0m         Creates, lists, deletes or verifies a tag object signed with GPG [\033[1;31mtag\033[0m]               | Usage: \033[1;32mgp-git label [label-name] [obj-id]\033[0m
+      \033[1;36mbranch\033[0m        Creates a new branch                                                                 | Usage: \033[1;32mgp-git branch [branch-name]\033[0m
+      \033[1;36mswitch\033[0m        Switches branches or restores working tree files [\033[1;31mcheckout\033[0m]                          | Usage: \033[1;32mgp-git switch [branch-name]\033[0m
+      \033[1;36mhistory\033[0m       Displays the save history of the repository [\033[1;31mlog\033[0m]                                    | Usage: \033[1;32mgp-git history\033[0m
+      \033[1;36mcombine\033[0m       Combines changes from one branch into another [\033[1;31mmerge\033[0m]                                | Usage: \033[1;32mgp-git combine [branch-name]\033[0m
+      \033[1;36mfingerprint\033[0m   Computes the object ID (hash) of a file and optionally creates a blob from it [\033[1;31mhash\033[0m] | Usage: \033[1;32mgp-git fingerprint [file-name]\033[0m
+      \033[1;36mview\033[0m          Shows content or type and size information for repository objects [\033[1;31mcat-file\033[0m]         | Usage: \033[1;32mgp-git view [obj-id]\033[0m
       \033[1;36mvis\033[0m           Visualizes commit history using graph structures                                     | Usage: \033[1;32mgp-git vis\033[0m
+      \033[1;36mshow\033[0m          Displays various types of objects (commits, trees, blobs, tags)                      | Usage: \033[1;32mgp-git show [obj-id]\033[0m
       \033[1;36mwrite-tree\033[0m    Creates a tree object from the current index                                         | Usage: \033[1;32mgp-git write-tree\033[0m
       \033[1;36mread-tree\033[0m     Reads tree information into the index                                                | Usage: \033[1;32mgp-git read-tree tree-id\033[0m
-      \033[1;36mshow\033[0m          Displays various types of objects (commits, trees, blobs, tags)                      | Usage: \033[1;32mgp-git show object-id\033[0m
-      \033[1;36mcompare\033[0m       Shows changes between commits, commit and working tree, etc [\033[1;31mdiff\033[0m]                   | Usage: \033[1;32mgp-git compare commit1 commit2\033[0m
-      \033[1;36mswitch\033[0m        Switches branches or restores working tree files [\033[1;31mcheckout\033[0m]                          | Usage: \033[1;32mgp-git switch branch-name\033[0m
-      \033[1;36mlabel\033[0m         Creates, lists, deletes or verifies a tag object signed with GPG [\033[1;31mtag\033[0m]               | Usage: \033[1;32mgp-git label tag-name\033[0m
+      \033[1;36mcompare\033[0m       Shows changes between commits, commit and working tree, etc [\033[1;31mdiff\033[0m]                   | Usage: \033[1;32mgp-git compare [--cached] [save]\033[0m
     """
     print(logo)
     print(help_text)

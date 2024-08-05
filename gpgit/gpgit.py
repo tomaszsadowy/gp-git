@@ -95,7 +95,7 @@ def show(args):
     if save.parents:
         parent_tree = base.get_save(save.parents[0]).tree
     _print_save(args.obj_id, save)
-    result = compare.compare_trees(base.get_tree(parent_tree), base.get_tree(save.tree))
+    result = compare.comp_trees(base.get_tree(parent_tree), base.get_tree(save.tree))
     sys.stdout.flush()
     sys.stdout.buffer.write(result)
 
@@ -115,7 +115,7 @@ def _compare(args):
             if not args.save:
                 tree_from = base.get_index_tree()
 
-        result = compare.compare_trees(tree_from, tree_to)
+        result = compare.comp_trees(tree_from, tree_to)
         sys.stdout.flush()
         sys.stdout.buffer.write(result)
 

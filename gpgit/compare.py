@@ -21,7 +21,7 @@ def iter_changed_files(t_from, t_to):
             yield path, action
 
 
-def compare_trees(t_from, t_to):
+def comp_trees(t_from, t_to):
     output = b""
     for path, o_from, o_to in compare_trees(t_from, t_to):
         if o_from != o_to:
@@ -38,7 +38,7 @@ def compare_blobs(o_from, o_to, path="blob"):
 
         with subprocess.Popen(
             [
-                "compare",
+                "diff",
                 "--unified",
                 "--show-c-function",
                 "--label",

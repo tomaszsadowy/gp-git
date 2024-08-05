@@ -143,7 +143,7 @@ def vis(args):
     dot = "digraph saves {\n"
     obj_ids = set()
 
-    for refname, ref in files.iter_refs():
+    for refname, ref in files.iter_refs(deref=False):
         dot += f'"{refname}" [shape=note]\n'
         dot += f'"{refname}" -> "{ref.value}"\n'
         if not ref.symbolic:
@@ -159,7 +159,7 @@ def vis(args):
     print(dot)
 
     with subprocess.Popen(
-        ["dot", "-fgtk", "/dev/stdin"], stdin=subprocess.PIPE
+        ["dot", "-Tgtk", "/dev/stdin"], stdin=subprocess.PIPE
     ) as proc:
         proc.communicate(dot.encode())
 
